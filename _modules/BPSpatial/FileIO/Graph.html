@@ -1,0 +1,523 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>BPSpatial.FileIO.Graph &mdash; BPSpatial 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> BPSpatial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../BPS_Analysis.html">Spatial Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BPS_FileIO.html">File I/O for spatial data</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">BPSpatial</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>BPSpatial.FileIO.Graph</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for BPSpatial.FileIO.Graph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@author: bspark</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">BPSpatial.Analysis.Graph</span> <span class="k">as</span> <span class="nn">AG</span>
+
+
+<span class="n">TYPES_EXCEL</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="s1">&#39;int64&#39;</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">,</span> <span class="s1">&#39;int8&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Point"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Point">[docs]</a><span class="k">class</span> <span class="nc">Point</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class to handle point-type graph that only has nodes without edges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Point.fromShapefile_nx"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Point.fromShapefile_nx">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromShapefile_nx</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[],</span> <span class="n">decimals</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for importing a shapefile and converting it to a newtorkx graph</span>
+<span class="sd">        using networkx. This may have a problem when the data has duplicate points</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">                        </span>
+<span class="sd">        attrs:          list of string</span>
+<span class="sd">                        attributes to add to a graph from the input shp file</span>
+<span class="sd">                        </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        graph:          networkx Graph</span>
+<span class="sd">                        a graph only with nodes, not edges</span>
+<span class="sd">                        graph.nodes - key:(x, y, ind), value:{column:value}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shp</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">read_shp</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        
+        <span class="n">attrDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            
+        <span class="k">if</span> <span class="n">decimals</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">ind</span><span class="p">),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                    <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">][(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">ind</span><span class="p">)]</span><span class="o">=</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="nb">round</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+                
+                <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                    <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">][(</span><span class="nb">round</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">)]</span><span class="o">=</span><span class="n">node</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
+            
+        <span class="c1"># add attributes</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">graph</span></div>
+    
+<div class="viewcode-block" id="Point.fromShapefile"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Point.fromShapefile">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromShapefile</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[],</span> <span class="n">decimals</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for importing a shapefile and converting it to a newtorkx graph</span>
+<span class="sd">        using geopandas to avoid of removal of points with the same coordinates</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">                        </span>
+<span class="sd">        attrs:          list of string</span>
+<span class="sd">                        attributes to add to a graph from the input shp file</span>
+<span class="sd">                        </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        graph:          networkx Graph</span>
+<span class="sd">                        a graph only with nodes, not edges</span>
+<span class="sd">                        graph.nodes - key:(x, y, ind), value:{column:value}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        <span class="n">shp</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">attr</span> <span class="ow">in</span> <span class="n">shp</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        
+        <span class="c1">#construct attribute dataset in dictionary- key:(x, y, ind), value:{column:value}</span>
+        <span class="k">if</span> <span class="n">decimals</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">attrDict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">geo</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">shp</span><span class="p">[</span><span class="n">attr</span><span class="p">])):</span>
+                    <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">][(</span><span class="n">geo</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">ind</span><span class="p">)]</span><span class="o">=</span> <span class="n">i</span>
+                    
+            <span class="c1">#add nodes</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">geo</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">geometry</span><span class="p">):</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="n">geo</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">ind</span><span class="p">),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+                
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attrDict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">geo</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">shp</span><span class="p">[</span><span class="n">attr</span><span class="p">])):</span>
+                    <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">][(</span><span class="nb">round</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">)]</span><span class="o">=</span> <span class="n">i</span>
+                    
+            <span class="c1">#add nodes</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">geo</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">geometry</span><span class="p">):</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="nb">round</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+
+
+        <span class="c1">#set attributes</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="n">graph</span></div>
+    
+<div class="viewcode-block" id="Point.fromExcel"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Point.fromExcel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromExcel</span><span class="p">(</span><span class="n">excelPath</span><span class="p">,</span> <span class="n">sheetName</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for creating a networkx graph from excel file</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        excelPath:      string</span>
+<span class="sd">                        path of excel file to access</span>
+<span class="sd">        </span>
+<span class="sd">        sheetName:      string</span>
+<span class="sd">                        name of sheet name to access</span>
+<span class="sd">                        </span>
+<span class="sd">        geometryKey:    tuple</span>
+<span class="sd">                        key of geometry(x,y) or (lng, lat) in columns or header list</span>
+<span class="sd">                        </span>
+<span class="sd">        header:         0 or None</span>
+<span class="sd">                        0, if data contains column names, </span>
+<span class="sd">                        None, otherwise</span>
+<span class="sd">        </span>
+<span class="sd">        columns:        list of tuple</span>
+<span class="sd">                        column name and type [(col1,dtype), (col2, dtype), ...]</span>
+<span class="sd">        </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        graph:          networkx graph</span>
+<span class="sd">                        a point-type graph, only having nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">header</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">header</span> <span class="o">==</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">excelPath</span><span class="p">,</span> <span class="n">sheetName</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">columns</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">exc</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">TYPES_EXCEL</span><span class="p">:</span>
+                    <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">TYPES_EXCEL</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">))</span>
+        
+        <span class="n">exc</span> <span class="o">=</span> <span class="n">Point</span><span class="o">.</span><span class="n">_nan</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+        <span class="n">geometryCol</span> <span class="o">=</span> <span class="p">(</span><span class="n">columns</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">],</span> <span class="n">columns</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">exc</span><span class="p">[</span><span class="n">geometryCol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">exc</span><span class="p">[</span><span class="n">geometryCol</span><span class="p">[</span><span class="mi">1</span><span class="p">]])):</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+        
+        <span class="c1">#construct attribute dataset in dictionary- key:(x, y, ind), value:{column:value}</span>
+        <span class="n">attrDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">exc</span><span class="p">[</span><span class="n">geometryCol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">exc</span><span class="p">[</span><span class="n">geometryCol</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">exc</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]])):</span>
+                <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]][(</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">)]</span> <span class="o">=</span> <span class="n">a</span>
+            
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            
+        <span class="k">return</span> <span class="n">graph</span></div>
+    
+
+<div class="viewcode-block" id="Point.fromCsv"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Point.fromCsv">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromCsv</span><span class="p">(</span><span class="n">csvPath</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for creating a networkx graph from excel file</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        csvPath:        string</span>
+<span class="sd">                        path of csv file to access</span>
+<span class="sd">        </span>
+<span class="sd">        geometryKey:    tuple</span>
+<span class="sd">                        key of geometry(x,y) or (lng, lat) in columns or header list</span>
+<span class="sd">                        </span>
+<span class="sd">        header:         0 or None</span>
+<span class="sd">                        0, if data contains column names, </span>
+<span class="sd">                        None, otherwise</span>
+<span class="sd">        </span>
+<span class="sd">        columns:        list of tuple</span>
+<span class="sd">                        column name and type [(col1,dtype), (col2, dtype), ...]</span>
+<span class="sd">        </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        graph:          networkx graph</span>
+<span class="sd">                        a point-type graph, only having nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">header</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">header</span> <span class="o">==</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csvPath</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">columns</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">csv</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="n">TYPES_EXCEL</span><span class="p">:</span>
+                    <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">TYPES_EXCEL</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">))</span>
+                    
+        <span class="n">csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csvPath</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        
+        <span class="n">csv</span> <span class="o">=</span> <span class="n">Point</span><span class="o">.</span><span class="n">_nan</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span>
+        
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+        
+        <span class="c1">#construct attribute dataset in dictionary- key:(x, y, ind), value:{column:value}</span>
+        <span class="n">attrDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+                <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]][(</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">decimals</span><span class="p">),</span> <span class="n">ind</span><span class="p">)]</span> <span class="o">=</span> <span class="n">a</span>
+            
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            
+        <span class="k">return</span> <span class="n">graph</span></div>
+        
+    <span class="nd">@staticmethod</span>    
+    <span class="k">def</span> <span class="nf">_nan</span><span class="p">(</span><span class="n">pandasDF</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pandasDF</span><span class="o">.</span><span class="n">values</span><span class="p">):</span> 
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pandasDF</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">row</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">pandasDF</span><span class="o">.</span><span class="n">keys</span><span class="p">())]):</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+                    <span class="n">replace</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">pandasDF</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace</span>
+        <span class="k">return</span> <span class="n">pandasDF</span></div>
+    
+
+        
+<div class="viewcode-block" id="Polyline"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Polyline">[docs]</a><span class="k">class</span> <span class="nc">Polyline</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to handle polyline-type graph that has both nodes and edges.</span>
+<span class="sd">    But nodes has no attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="Polyline.fromShapefile"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Graph.Polyline.fromShapefile">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromShapefile</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for importing a shapefile and converting it to a newtorkx graph</span>
+<span class="sd">        using networkx. This may have a problem when the data has duplicate points</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">                        </span>
+<span class="sd">        attrs:          list of string</span>
+<span class="sd">                        attributes to add to a graph from the input shp file</span>
+<span class="sd">                        </span>
+<span class="sd">        decimals:       int</span>
+<span class="sd">                        number of decimals to round</span>
+<span class="sd">                        </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        graph:          networkx Graph</span>
+<span class="sd">                        a graph only with nodes, not edges</span>
+<span class="sd">                        graph.nodes - key:((x1, y2), (x2,y2)) value:{column:value}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shp</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">read_shp</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">add_node</span><span class="p">((</span><span class="nb">round</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">)),</span> <span class="n">Ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">)</span>
+        
+        <span class="n">attrDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shp</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+            <span class="n">coordRound</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;Json&#39;</span><span class="p">])[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">]:</span>
+                <span class="n">xyRound</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="n">coord</span><span class="p">:</span>
+                    <span class="n">xyRound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">ele</span><span class="p">,</span><span class="n">decimals</span><span class="p">))</span>
+                <span class="n">coordRound</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xyRound</span><span class="p">)</span>
+            
+            <span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">((</span><span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">)),</span> \
+                           <span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">)),</span> \
+                                <span class="n">Ind</span><span class="o">=</span> <span class="n">ind</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span> <span class="n">coordRound</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+                <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">][((</span><span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">)),</span> \
+                               <span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">decimals</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">decimals</span><span class="p">)))]</span> \
+                                <span class="o">=</span><span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
+            
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">set_edge_attributes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">attrDict</span><span class="p">[</span><span class="n">attr</span><span class="p">])</span>
+                
+        <span class="n">AG</span><span class="o">.</span><span class="n">graphCalculate</span><span class="o">.</span><span class="n">addDistance</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">graph</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Bumsub Park
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

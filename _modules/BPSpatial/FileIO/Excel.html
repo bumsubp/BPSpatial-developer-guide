@@ -1,0 +1,561 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>BPSpatial.FileIO.Excel &mdash; BPSpatial 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> BPSpatial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../BPS_Analysis.html">Spatial Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BPS_FileIO.html">File I/O for spatial data</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">BPSpatial</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>BPSpatial.FileIO.Excel</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for BPSpatial.FileIO.Excel</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">xlrd</span>
+<span class="kn">import</span> <span class="nn">openpyxl</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">xlsxwriter</span>
+
+
+<div class="viewcode-block" id="clear_sheet"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.clear_sheet">[docs]</a><span class="k">def</span> <span class="nf">clear_sheet</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for deleting all the values in a excel sheet</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">openpyxl</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="n">sheetname</span><span class="p">]</span>
+    <span class="n">wb</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">std</span><span class="p">)</span>
+    <span class="n">wb</span><span class="o">.</span><span class="n">create_sheet</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+    <span class="n">wb</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully cleared!&quot;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for reading a .csv file which separating values with comma(&#39; ,&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    Parameter</span>
+<span class="sd">    ---------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the .csv file to handle</span>
+<span class="sd">    </span>
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    resultList: nested list</span>
+<span class="sd">                list of values of .csv file \n</span>
+<span class="sd">                [[row1val1, row1val2, ...], \n</span>
+<span class="sd">                [row2val1, row2val2, ...], ...]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+        <span class="n">spamreader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+        
+        <span class="n">outList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">spamreader</span><span class="p">:</span>
+            <span class="n">outList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outList</span></div>
+    
+<div class="viewcode-block" id="create_xlsx"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.create_xlsx">[docs]</a><span class="k">def</span> <span class="nf">create_xlsx</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for creating a bland excel file</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create an new Excel file and add a worksheet.</span>
+    <span class="n">workbook</span> <span class="o">=</span> <span class="n">xlsxwriter</span><span class="o">.</span><span class="n">Workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">workbook</span><span class="o">.</span><span class="n">add_worksheet</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+    <span class="n">workbook</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully created!&quot;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="excel_to_csv"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.excel_to_csv">[docs]</a><span class="k">def</span> <span class="nf">excel_to_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">,</span> <span class="n">csvfilepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for converting excel file to csv file</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">    </span>
+<span class="sd">    csvfilepath:string</span>
+<span class="sd">                path of csv file to save</span>
+<span class="sd">                </span>
+<span class="sd">    encoding:   string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">sheet_by_name</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+    <span class="n">csvfile</span><span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">csvfilepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">wr</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">quoting</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_ALL</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">rownum</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sh</span><span class="o">.</span><span class="n">nrows</span><span class="p">):</span>
+        <span class="n">wr</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">sh</span><span class="o">.</span><span class="n">row_values</span><span class="p">(</span><span class="n">rownum</span><span class="p">))</span>
+
+    <span class="n">csvfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Successfully converted!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_xlsx"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.read_xlsx">[docs]</a><span class="k">def</span> <span class="nf">read_xlsx</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for loading an excel file</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">                </span>
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    resultXlrd: list of xlrd.sheet.Cell</span>
+<span class="sd">    </span>
+<span class="sd">                list of excel values in xlrd.sheet.Cell type</span>
+<span class="sd">                </span>
+<span class="sd">                value.ctype \n</span>
+<span class="sd">                XL_CELL_EMPTY	0	empty string &#39;&#39; \n</span>
+<span class="sd">                XL_CELL_TEXT	1	a Unicode string \n</span>
+<span class="sd">                XL_CELL_NUMBER	2	float \n</span>
+<span class="sd">                XL_CELL_DATE	3	float \n</span>
+<span class="sd">                XL_CELL_BOOLEAN	4	int; 1 means TRUE, 0 means FALSE \n</span>
+<span class="sd">                XL_CELL_ERROR	5	int representing internal Excel codes; </span>
+<span class="sd">                for a text representation, refer to the supplied dictionary error_text_from_code \n</span>
+<span class="sd">                XL_CELL_BLANK	6	empty string &#39;&#39;. Note: this type will appear only when open_workbook(..., formatting_info=True) is used. \n</span>
+<span class="sd">                </span>
+<span class="sd">                value.value \n</span>
+<span class="sd">                Or output of this function can be an input of &#39;excel_to_list&#39; function</span>
+<span class="sd">                </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workbook</span> <span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">worksheet</span> <span class="o">=</span> <span class="n">workbook</span><span class="o">.</span><span class="n">sheet_by_name</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+    
+    <span class="n">num_rows</span> <span class="o">=</span> <span class="n">worksheet</span><span class="o">.</span><span class="n">nrows</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">curr_row</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">resultXlrd</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">while</span> <span class="n">curr_row</span> <span class="o">&lt;</span> <span class="n">num_rows</span><span class="p">:</span>
+        <span class="n">curr_row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">worksheet</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">curr_row</span><span class="p">)</span>
+        <span class="n">resultXlrd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">resultXlrd</span></div>
+    
+
+<div class="viewcode-block" id="excel_to_list"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.excel_to_list">[docs]</a><span class="k">def</span> <span class="nf">excel_to_list</span><span class="p">(</span><span class="n">excelList</span><span class="p">,</span> <span class="n">startAt</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for coverting list of xlrd.sheet.Cell to a nested list</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    excelList:  list of xlrd.sheet.Cell</span>
+<span class="sd">                usually output of read_xlsx function</span>
+<span class="sd">                </span>
+<span class="sd">    startAt:    int</span>
+<span class="sd">                start index of rows \n</span>
+<span class="sd">                if you have a header in the excel file, this would be 1</span>
+<span class="sd">                </span>
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    resultList: nested list</span>
+<span class="sd">                list of values of .csv file \n</span>
+<span class="sd">                [[row1val1, row1val2, ...], \n</span>
+<span class="sd">                [row2val1, row2val2, ...], ...]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">resultList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">excelList</span><span class="p">[</span><span class="n">startAt</span><span class="p">:]:</span>
+        <span class="n">rowList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">ctype</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">resultList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowList</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resultList</span></div>
+
+    
+<div class="viewcode-block" id="write_column"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.write_column">[docs]</a><span class="k">def</span> <span class="nf">write_column</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">,</span> <span class="n">insert</span><span class="p">,</span> <span class="n">startCol</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">startRow</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for adding a set of columns in an existing excel file</span>
+<span class="sd">    </span>
+<span class="sd">    Paramters</span>
+<span class="sd">    ---------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">        </span>
+<span class="sd">    insert:     nested list</span>
+<span class="sd">                [ [col1], [col2] , [col3], ...]</span>
+<span class="sd">        </span>
+<span class="sd">    startCol:   int</span>
+<span class="sd">                index of staring column \n</span>
+<span class="sd">                if 0, the next colume of the last column of the excel file</span>
+<span class="sd">        </span>
+<span class="sd">    startRow:   int</span>
+<span class="sd">                index of staring row \n</span>
+<span class="sd">                if 0, the next row of the last column of the excel file \n</span>
+<span class="sd">                1, the first row</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">sheet_by_name</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+    
+    <span class="n">workbook</span> <span class="o">=</span> <span class="n">openpyxl</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">worksheet</span> <span class="o">=</span> <span class="n">workbook</span><span class="p">[</span><span class="n">sheetname</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">startCol</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">indCol</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">ncols</span><span class="o">+</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">indCol</span> <span class="o">=</span> <span class="n">startCol</span>
+    
+    <span class="c1">#column</span>
+    <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">insert</span><span class="p">:</span>
+        <span class="c1">#cell</span>
+        <span class="k">if</span> <span class="n">startRow</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">indRow</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">nrows</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">indRow</span> <span class="o">=</span> <span class="n">startRow</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">worksheet</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span> <span class="n">indRow</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="n">indCol</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">attr</span>
+            <span class="k">except</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Type Error - &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">indCol</span><span class="p">))</span>
+    
+            <span class="n">indRow</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">indCol</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="n">workbook</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;saved successfully in existing file!&#39;</span><span class="p">)</span> </div>
+
+<div class="viewcode-block" id="write_row"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.write_row">[docs]</a><span class="k">def</span> <span class="nf">write_row</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">,</span> <span class="n">insert</span><span class="p">,</span> <span class="n">startCol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">startRow</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for adding a set of rows in an existing excel file</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">        </span>
+<span class="sd">    insert:     nested list</span>
+<span class="sd">                [[row1], [row2], [row3], ...]</span>
+<span class="sd">        </span>
+<span class="sd">    startCol:   int</span>
+<span class="sd">                index of staring column \n</span>
+<span class="sd">                if 0, the next colume of the last column of the excel file \n</span>
+<span class="sd">                1, A column of excel file</span>
+<span class="sd">        </span>
+<span class="sd">    startRow:   int</span>
+<span class="sd">                index of staring row \n</span>
+<span class="sd">                if 0, the next row of the last column of the excel file \n</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">xlrd</span><span class="o">.</span><span class="n">open_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">sheet_by_name</span><span class="p">(</span><span class="n">sheetname</span><span class="p">)</span>
+    
+    <span class="n">workbook</span> <span class="o">=</span> <span class="n">openpyxl</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="n">worksheet</span> <span class="o">=</span> <span class="n">workbook</span><span class="p">[</span><span class="n">sheetname</span><span class="p">]</span>
+<span class="c1">#    worksheet = workbook.get_sheet_by_name(sheetname)</span>
+    
+    <span class="k">if</span> <span class="n">startRow</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">indRow</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">nrows</span><span class="o">+</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">indRow</span> <span class="o">=</span> <span class="n">startRow</span>
+    <span class="c1">#row</span>
+    <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">insert</span><span class="p">:</span>
+        <span class="c1">#cell</span>
+        <span class="k">if</span> <span class="n">startCol</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">indCol</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">ncols</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">indCol</span> <span class="o">=</span> <span class="n">startCol</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">worksheet</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span> <span class="n">indRow</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="n">indCol</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">attr</span>
+            <span class="k">except</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;Type Error - &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">indCol</span><span class="p">))</span>
+            
+            <span class="n">indCol</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">indRow</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="n">workbook</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;saved successfully in existing file!&#39;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="pointGraph_to_xlsx"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.pointGraph_to_xlsx">[docs]</a><span class="k">def</span> <span class="nf">pointGraph_to_xlsx</span><span class="p">(</span><span class="n">pointGraph</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for converting a point graph to an excel file</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pointGraph:     networkx graph  </span>
+<span class="sd">                    point type networkx graph to convert</span>
+<span class="sd">                    </span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colNames</span> <span class="o">=</span> <span class="s1">&#39;nodeX nodeY&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">pointGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">colNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        
+    <span class="n">dataList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">pointGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">rowList</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="n">dataList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowList</span><span class="p">)</span>
+    
+    <span class="n">dataList</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">colNames</span><span class="p">)</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">clear_sheet</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">create_xlsx</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">write_row</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">,</span> <span class="n">dataList</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="nestedDict_to_xlsx"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.Excel.nestedDict_to_xlsx">[docs]</a><span class="k">def</span> <span class="nf">nestedDict_to_xlsx</span><span class="p">(</span><span class="n">nestedDict</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">,</span> <span class="n">colNames</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method for converting nested dictionary to excel file</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nestedDict:     nested dictionary</span>
+<span class="sd">                    dicationry to convert to an excel file</span>
+<span class="sd">                    </span>
+<span class="sd">    filepath:   string</span>
+<span class="sd">                path of the excel file to handle            </span>
+<span class="sd">    </span>
+<span class="sd">    sheetname:  string</span>
+<span class="sd">                name of sheet to access</span>
+<span class="sd">                </span>
+<span class="sd">    colNames:   list of string</span>
+<span class="sd">                a list of column names. The number of column names should be same to that of data variables</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">survivedType</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;class &#39;str&#39;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;class &#39;float&#39;&gt;&quot;</span> <span class="p">,</span> <span class="s2">&quot;&lt;class &#39;int&#39;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;class &#39;bool&#39;&gt;&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">colNames</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">nestedDict</span><span class="o">.</span><span class="n">values</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colNames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">nestedDict</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">)</span>
+        
+    <span class="n">dataList</span> <span class="o">=</span> <span class="p">[</span><span class="n">colNames</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key1</span><span class="p">,</span> <span class="n">val1</span> <span class="ow">in</span> <span class="n">nestedDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">rowList</span> <span class="o">=</span> <span class="p">[</span><span class="n">key1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key2</span><span class="p">,</span> <span class="n">val2</span> <span class="ow">in</span> <span class="n">val1</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">val2</span><span class="p">))</span> <span class="ow">in</span> <span class="n">survivedType</span><span class="p">:</span> <span class="c1"># only acceptable type takes its own type</span>
+                <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># otherwise, it takes str type</span>
+                <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val2</span><span class="p">))</span>
+        <span class="n">dataList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowList</span><span class="p">)</span>
+        
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">clear_sheet</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">create_xlsx</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">write_row</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sheetname</span><span class="p">,</span> <span class="n">dataList</span><span class="p">)</span></div>
+    
+        
+    
+        
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Bumsub Park
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

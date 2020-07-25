@@ -1,0 +1,24 @@
+File I/O for spatial data
+==============================
+.. automodule:: BPSpatial.FileIO
+
+
+Excel
+-----------------------------------------------------------------------------------
+.. automodule:: BPSpatial.FileIO.Excel
+    :members:
+
+Graph
+-----------------------------------------------------------------------------------
+.. automodule:: BPSpatial.FileIO.Graph
+    :members:
+
+RTree
+-----------------------------------------------------------------------------------
+.. automodule:: BPSpatial.FileIO.RTree
+    :members:
+
+Shapefile
+-----------------------------------------------------------------------------------
+.. automodule:: BPSpatial.FileIO.SHP
+    :members:

@@ -1,0 +1,642 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>BPSpatial.FileIO.SHP &mdash; BPSpatial 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> BPSpatial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../BPS_Analysis.html">Spatial Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../BPS_FileIO.html">File I/O for spatial data</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">BPSpatial</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>BPSpatial.FileIO.SHP</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for BPSpatial.FileIO.SHP</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">shapefile</span> <span class="c1"># pyshp.__version__ == 1.2.12</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">fiona</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="c1">#from mpl_toolkits.basemap import Basemap # https://anaconda.org/conda-forge/basemap</span>
+<span class="c1">#import matplotlib.pyplot as plt</span>
+<span class="c1">#import numpy as np</span>
+
+
+<span class="n">TYPES_SHP</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;float&#39;</span><span class="p">:</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s2">&quot;&lt;class &#39;float&#39;&gt;&quot;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> \
+             <span class="s1">&#39;string&#39;</span><span class="p">:</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span><span class="s1">&#39;L&#39;</span><span class="p">}</span>
+
+<div class="viewcode-block" id="dbf"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.dbf">[docs]</a><span class="k">class</span> <span class="nc">dbf</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class for handling dbf file, which attributes of spatial dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="dbf.dropFields"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.dbf.dropFields">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">dropFields</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">dropfieldList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that delete fields of geopandas Dataframe</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">                        </span>
+<span class="sd">        dropfieldList:  list</span>
+<span class="sd">                        column names to delete</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gpdData</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="kc">False</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">i</span> <span class="ow">in</span> <span class="n">gpdData</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dropfieldList</span><span class="p">])</span>
+        
+        <span class="n">prjPath</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">prj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shpPath</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">prjDesc</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prjPath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dropfieldList</span><span class="p">:</span>
+            <span class="n">gpdData</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">gpdData</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        
+        <span class="n">prj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prjPath</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
+        <span class="n">prj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prjDesc</span><span class="p">)</span>
+        <span class="n">prj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Remaining fields: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gpdData</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span></div>
+        
+    
+<div class="viewcode-block" id="dbf.renameField"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.dbf.renameField">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">renameField</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that change name of column</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">                        </span>
+<span class="sd">        fromName:       string</span>
+<span class="sd">                        column name to change</span>
+<span class="sd">        </span>
+<span class="sd">        toName:         string</span>
+<span class="sd">                        new name of the column</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gpdData</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        
+        <span class="k">assert</span><span class="p">(</span><span class="n">fromName</span> <span class="ow">in</span> <span class="n">gpdData</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        
+        <span class="n">prjPath</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">prj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shpPath</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">prjDesc</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prjPath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        
+        <span class="n">gpdData</span><span class="p">[</span><span class="n">toName</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpdData</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">fromName</span><span class="p">)</span>
+        <span class="n">gpdData</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        
+        <span class="n">prj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prjPath</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
+        <span class="n">prj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prjDesc</span><span class="p">)</span>
+        <span class="n">prj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The field name is changed from &quot;</span><span class="si">{}</span><span class="s1">&quot; to &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">))</span></div></div>
+        
+        
+<div class="viewcode-block" id="Point"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Point">[docs]</a><span class="k">class</span> <span class="nc">Point</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for creating a shapefile of point data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_addRecords</span><span class="p">(</span><span class="n">point_shp</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private method to add records when creating a shapefile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">records</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># except for nan cases</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">point_shp</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span> <span class="c1"># (lon, lat) or (x, y)</span>
+                <span class="n">point_shp</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="o">*</span><span class="nb">tuple</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">))]))</span>
+        <span class="k">return</span> <span class="n">point_shp</span>
+    
+<div class="viewcode-block" id="Point.fromGraph"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Point.fromGraph">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromGraph</span><span class="p">(</span><span class="n">pntGraph</span><span class="p">,</span> <span class="n">shpPath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that creates a point shapefile from a networkx graph</span>
+<span class="sd">        </span>
+<span class="sd">        type of shapefile - https://en.wikipedia.org/wiki/Shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        Example - https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pntGraph:       neworkx.Graph</span>
+<span class="sd">                        a graph only has nodes object, not edges</span>
+<span class="sd">        </span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">point_shp</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">Writer</span><span class="p">(</span><span class="n">shapefile</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
+        <span class="n">point_shp</span><span class="o">.</span><span class="n">autoBalance</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="n">colList</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pntGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">colList</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">))))</span>
+                
+        <span class="n">recordList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pnt</span> <span class="ow">in</span> <span class="n">pntGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">rowList</span> <span class="o">=</span> <span class="p">[</span><span class="n">pnt</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">pnt</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">colList</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+                <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pnt</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="n">recordList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowList</span><span class="p">)</span>
+            
+        <span class="n">Point</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">colList</span><span class="p">,</span> <span class="n">recordList</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span></div>
+            
+        
+<div class="viewcode-block" id="Point.new"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Point.new">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that creates a point shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        type of shapefile - https://en.wikipedia.org/wiki/Shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        Example - https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/</span>
+<span class="sd">        </span>
+<span class="sd">        Parameter</span>
+<span class="sd">        ---------</span>
+<span class="sd">        shpPath:    string</span>
+<span class="sd">                    path of shapefile to handle    </span>
+<span class="sd">    </span>
+<span class="sd">        fields:     list of tuple</span>
+<span class="sd">                    list of data fields</span>
+<span class="sd">                    ex) [tuple(field name, type)]</span>
+<span class="sd">        </span>
+<span class="sd">        records:    list of tuple</span>
+<span class="sd">                    dataset</span>
+<span class="sd">                    ex) [(val11, val12, ...),(val21, val22, ...)]</span>
+<span class="sd">    </span>
+<span class="sd">        geometryKey:tuple</span>
+<span class="sd">                    geometry keys, location of latitude and longitude in the records</span>
+<span class="sd">                    ex) tuple(longitude, latitude) or tuple(x, y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">point_shp</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">Writer</span><span class="p">(</span><span class="n">shapefile</span><span class="o">.</span><span class="n">POINT</span><span class="p">)</span>
+        <span class="n">point_shp</span><span class="o">.</span><span class="n">autoBalance</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># =============================================================================</span>
+        <span class="c1"># Because every shape must have a corresponding record it is critical that the</span>
+        <span class="c1"># number of records equals the number of shapes to create a valid shapefile. To</span>
+        <span class="c1"># help prevent accidental misalignment pyshp has an &quot;auto balance&quot; feature to</span>
+        <span class="c1"># make sure when you add either a shape or a record the two sides of the</span>
+        <span class="c1"># equation line up. This feature is NOT turned on by default. To activate it set</span>
+        <span class="c1"># the attribute autoBalance to 1 (True)</span>
+        <span class="c1"># =============================================================================</span>
+        
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">TYPES_SHP</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span> <span class="ow">or</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&lt;class &#39;float&#39;&gt;&quot;</span><span class="p">:</span>
+                    <span class="n">point_shp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span> <span class="n">TYPES_SHP</span><span class="p">[</span><span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">decimal</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">point_shp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span> <span class="n">TYPES_SHP</span><span class="p">[</span><span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">point_shp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        
+                
+        <span class="n">point_shp</span> <span class="o">=</span> <span class="n">Point</span><span class="o">.</span><span class="n">_addRecords</span><span class="p">(</span><span class="n">point_shp</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">)</span>
+                             
+        <span class="n">point_shp</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shapefile successfully created!&#39;</span><span class="p">)</span></div></div>
+                
+    
+<div class="viewcode-block" id="Polyline"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Polyline">[docs]</a><span class="k">class</span> <span class="nc">Polyline</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for creating a shapefile of polyline data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_addRecords</span><span class="p">(</span><span class="n">polyline_shp</span><span class="p">,</span> <span class="n">polylineGraph</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Private method to add records when creating a shapefile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">polylineGraph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="n">geometryKey</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">polyline_shp</span><span class="o">.</span><span class="n">poly</span><span class="p">(</span><span class="n">parts</span><span class="o">=</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;coordinates&#39;</span><span class="p">]],</span> <span class="n">shapeType</span><span class="o">=</span><span class="n">shapefile</span><span class="o">.</span><span class="n">POLYLINE</span><span class="p">)</span>
+                <span class="n">polyline_shp</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="o">*</span><span class="nb">tuple</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">))]))</span>
+            
+        <span class="k">return</span> <span class="n">polyline_shp</span>
+    
+    
+<div class="viewcode-block" id="Polyline.new"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Polyline.new">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">polylineGraph</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that creates a polyline shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        type of shapefile - https://en.wikipedia.org/wiki/Shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        Example - https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/</span>
+<span class="sd">        </span>
+<span class="sd">        Parameter</span>
+<span class="sd">        ---------</span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">                    </span>
+<span class="sd">        polylineGraph:  networkx graph</span>
+<span class="sd">                        polyline type graph which including coordinates of vertices</span>
+<span class="sd">    </span>
+<span class="sd">        fields:         list of tuple</span>
+<span class="sd">                        list of data fields</span>
+<span class="sd">                        ex) [tuple(field name, type)]</span>
+<span class="sd">        </span>
+<span class="sd">        records:        list of tuple</span>
+<span class="sd">                        dataset</span>
+<span class="sd">                        ex) [(val11, val12, ...),(val21, val22, ...)]</span>
+<span class="sd">    </span>
+<span class="sd">        geometryKey:    tuple</span>
+<span class="sd">                        geometry keys, location of two end nodes in the records</span>
+<span class="sd">                        ex) tuple(tuple(longitude, latitude), tuple(longitude, latitude))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">polyline_shp</span> <span class="o">=</span> <span class="n">shapefile</span><span class="o">.</span><span class="n">Writer</span><span class="p">(</span><span class="n">shapefile</span><span class="o">.</span><span class="n">POLYLINE</span><span class="p">)</span>
+        <span class="n">polyline_shp</span><span class="o">.</span><span class="n">autoBalance</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># =============================================================================</span>
+        <span class="c1"># Because every shape must have a corresponding record it is critical that the</span>
+        <span class="c1"># number of records equals the number of shapes to create a valid shapefile. To</span>
+        <span class="c1"># help prevent accidental misalignment pyshp has an &quot;auto balance&quot; feature to</span>
+        <span class="c1"># make sure when you add either a shape or a record the two sides of the</span>
+        <span class="c1"># equation line up. This feature is NOT turned on by default. To activate it set</span>
+        <span class="c1"># the attribute autoBalance to 1 (True)</span>
+        <span class="c1"># =============================================================================</span>
+        
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">TYPES_SHP</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span> <span class="ow">or</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&lt;class &#39;float&#39;&gt;&quot;</span><span class="p">:</span>
+                    <span class="n">polyline_shp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span> <span class="n">TYPES_SHP</span><span class="p">[</span><span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">decimal</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">polyline_shp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span> <span class="n">TYPES_SHP</span><span class="p">[</span><span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">polyline_shp</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        
+                
+        <span class="n">polyline_shp</span> <span class="o">=</span> <span class="n">Polyline</span><span class="o">.</span><span class="n">_addRecords</span><span class="p">(</span><span class="n">polyline_shp</span><span class="p">,</span> <span class="n">polylineGraph</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">geometryKey</span><span class="p">)</span>
+                             
+        <span class="n">polyline_shp</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shapefile successfully created!&#39;</span><span class="p">)</span></div>
+    
+    
+<div class="viewcode-block" id="Polyline.fromGraph"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Polyline.fromGraph">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromGraph</span><span class="p">(</span><span class="n">polylineGraph</span><span class="p">,</span> <span class="n">shpPath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that creates a polyline shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        type of shapefile - https://en.wikipedia.org/wiki/Shapefile</span>
+<span class="sd">                </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        polylineGraph:  neworkx.Graph</span>
+<span class="sd">                        polyline type graph that includes edges information</span>
+<span class="sd">        </span>
+<span class="sd">        shpPath:        string</span>
+<span class="sd">                        path of shapefile to handle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">polylineGraph_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">polylineGraph</span><span class="p">)</span>
+        
+        <span class="n">colList</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y1&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X2&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y2&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">polylineGraph_copy</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">colList</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">))))</span>
+        
+        <span class="n">recordList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">polylineGraph_copy</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">rowList</span> <span class="o">=</span> <span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">colList</span><span class="p">[</span><span class="mi">4</span><span class="p">:]:</span>
+                <span class="n">rowList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="n">recordList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rowList</span><span class="p">)</span>
+            
+        <span class="n">Polyline</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">polylineGraph_copy</span><span class="p">,</span> <span class="n">colList</span><span class="p">,</span> <span class="n">recordList</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div></div>
+    
+<div class="viewcode-block" id="Projection"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Projection">[docs]</a><span class="k">class</span> <span class="nc">Projection</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles with projection related functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Projection.getWKT_PRJ"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Projection.getWKT_PRJ">[docs]</a>    <span class="k">def</span> <span class="nf">getWKT_PRJ</span><span class="p">(</span><span class="n">crsCode</span><span class="p">,</span> <span class="n">crsType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to get &#39;Human-Readable OGC WKT&#39; type projection information from spatialreference.org</span>
+<span class="sd">        </span>
+<span class="sd">        This is utilized when creating .prj file</span>
+<span class="sd">        </span>
+<span class="sd">        Ex) https://glenbambrick.com/2015/08/09/prj/</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        crsCode:    int</span>
+<span class="sd">                    coordinate reference system code</span>
+<span class="sd">                    </span>
+<span class="sd">        crsType:    string</span>
+<span class="sd">                    &#39;epsg&#39;, &#39;esri&#39;, or &#39;sr-org&#39;. The others can raise an error.</span>
+<span class="sd">                    </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        crsStr:     string</span>
+<span class="sd">                    coordinate reference system in string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crsTypeDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;epsg&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;esri&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;sr-org&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">crsTypeDict</span><span class="p">[</span><span class="n">crsType</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># access projection information</span>
+            <span class="n">wkt</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://spatialreference.org/ref/epsg/</span><span class="si">{0}</span><span class="s2">/prettywkt/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crsCode</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">i</span><span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">wkt</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://spatialreference.org/ref/esri/</span><span class="si">{0}</span><span class="s2">/prettywkt/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crsCode</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">wkt</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://spatialreference.org/ref/sr-org/</span><span class="si">{0}</span><span class="s2">/prettywkt/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crsCode</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+            
+        <span class="n">content</span><span class="o">=</span><span class="n">wkt</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="s1">&#39;Not found&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span><span class="p">)</span>
+        <span class="c1"># remove spaces between charachters</span>
+        <span class="n">remove_spaces</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># place all the text on one line</span>
+        <span class="n">remove_r</span> <span class="o">=</span> <span class="n">remove_spaces</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">crsStr</span> <span class="o">=</span> <span class="n">remove_r</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">crsStr</span> </div>
+     
+        
+<div class="viewcode-block" id="Projection.getPROJ4"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Projection.getPROJ4">[docs]</a>    <span class="k">def</span> <span class="nf">getPROJ4</span><span class="p">(</span><span class="n">crsCode</span><span class="p">,</span> <span class="n">crsType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to get &#39;Proj4&#39; type projection information from spatialreference.org</span>
+<span class="sd">        </span>
+<span class="sd">        This is utilized when implementing project()</span>
+<span class="sd">        </span>
+<span class="sd">        The output is a dictionray which is standard crs form</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        crsCode:    int</span>
+<span class="sd">                    coordinate reference system code</span>
+<span class="sd">                    </span>
+<span class="sd">        crsType:    string</span>
+<span class="sd">                    &#39;epsg&#39;, &#39;esri&#39;, or &#39;sr-org&#39;. The others can raise an error.</span>
+<span class="sd">                    </span>
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        crsDict:    dictionary</span>
+<span class="sd">                    coordinate reference system in dictionary type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">crsTypeDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;epsg&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;esri&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;sr-org&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">crsTypeDict</span><span class="p">[</span><span class="n">crsType</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">proj4</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://spatialreference.org/ref/epsg/</span><span class="si">{0}</span><span class="s2">/proj4/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crsCode</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">proj4</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://spatialreference.org/ref/esri/</span><span class="si">{0}</span><span class="s2">/proj4/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crsCode</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">proj4</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://spatialreference.org/ref/sr-org/</span><span class="si">{0}</span><span class="s2">/proj4/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crsCode</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+            
+        <span class="n">content</span> <span class="o">=</span> <span class="n">proj4</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="s1">&#39;Not found&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span><span class="p">)</span>
+        
+        <span class="n">crsDict</span> <span class="o">=</span> <span class="n">fiona</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">crsDict</span></div>
+    
+<div class="viewcode-block" id="Projection.copyCRS"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Projection.copyCRS">[docs]</a>    <span class="k">def</span> <span class="nf">copyCRS</span><span class="p">(</span><span class="n">shpPathFrom</span><span class="p">,</span> <span class="n">shpPathTo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for copying the crs of existing .prj file to another shp file</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPathFrom: string</span>
+<span class="sd">                     shp file path that you copies the crs from</span>
+<span class="sd">                     </span>
+<span class="sd">        shpPathTo:   string</span>
+<span class="sd">                     shp file path to add the copied crs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">prj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shpPathFrom</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]),</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">prj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shpPathTo</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;successfully copied the .prj file!&#39;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Projection.defineProjection"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Projection.defineProjection">[docs]</a>    <span class="k">def</span> <span class="nf">defineProjection</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">crsCode</span><span class="p">,</span> <span class="n">crsType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method that creates a .proj file for shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpPath:    string</span>
+<span class="sd">                    path of shapefile to handle    </span>
+<span class="sd">                    </span>
+<span class="sd">        crsCode:    int</span>
+<span class="sd">                    coordinate reference system code</span>
+<span class="sd">                    </span>
+<span class="sd">        crsType:    string</span>
+<span class="sd">                    &#39;epsg&#39; or &#39;sr-org&#39;. The others can raise an error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prjPath</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">prj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shpPath</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">prjDesc</span> <span class="o">=</span> <span class="n">Projection</span><span class="o">.</span><span class="n">getWKT_PRJ</span><span class="p">(</span><span class="n">crsCode</span><span class="p">,</span> <span class="n">crsType</span><span class="p">)</span>
+        <span class="n">prj</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">prjPath</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
+        <span class="n">prj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prjDesc</span><span class="p">)</span>
+        <span class="n">prj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.prj file successfully created!&#39;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Projection.project"><a class="viewcode-back" href="../../../BPS_FileIO.html#BPSpatial.FileIO.SHP.Projection.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="n">shpPath</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">shpPathPrj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to convert projection of a shapefile</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shpfile:    string</span>
+<span class="sd">                    path of input shapefile to convert the coordinate system</span>
+<span class="sd">                    </span>
+<span class="sd">        crs:        dictionary</span>
+<span class="sd">                    a standard form of crs</span>
+<span class="sd">                    </span>
+<span class="sd">        path:       string</span>
+<span class="sd">                    path of the output shapefile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shpPath</span><span class="p">)</span>
+        <span class="c1">#get coordinate reference system of the current shp file</span>
+        <span class="n">currProj</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">crs</span>
+        
+        <span class="n">data_proj</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># convert x, y values of dataset based on the crs provided from the input</span>
+        <span class="n">data_proj</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_proj</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+        <span class="c1"># conver crs of the shp file</span>
+        <span class="n">data_proj</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span>
+        <span class="c1"># svae the new shp file</span>
+        <span class="n">data_proj</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">shpPathPrj</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The previous crs:</span><span class="si">{}</span><span class="se">\n</span><span class="s1"> Current crs:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">currProj</span><span class="p">,</span> <span class="n">data_proj</span><span class="o">.</span><span class="n">crs</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Bumsub Park
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

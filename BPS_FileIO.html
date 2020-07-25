@@ -1,0 +1,781 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>File I/O for spatial data &mdash; BPSpatial 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Spatial Analysis" href="BPS_Analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> BPSpatial
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="BPS_Analysis.html">Spatial Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File I/O for spatial data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-BPSpatial.FileIO.Excel">Excel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-BPSpatial.FileIO.Graph">Graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-BPSpatial.FileIO.RTree">RTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-BPSpatial.FileIO.SHP">Shapefile</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BPSpatial</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>File I/O for spatial data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/BPS_FileIO.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-BPSpatial.FileIO">
+<span id="file-i-o-for-spatial-data"></span><h1>File I/O for spatial data<a class="headerlink" href="#module-BPSpatial.FileIO" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-BPSpatial.FileIO.Excel">
+<span id="excel"></span><h2>Excel<a class="headerlink" href="#module-BPSpatial.FileIO.Excel" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.clear_sheet">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">clear_sheet</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#clear_sheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.clear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for deleting all the values in a excel sheet</p>
+<dl class="simple">
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.create_xlsx">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">create_xlsx</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#create_xlsx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.create_xlsx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for creating a bland excel file</p>
+<dl class="simple">
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.excel_to_csv">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">excel_to_csv</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em>, <em class="sig-param">csvfilepath</em>, <em class="sig-param">encoding='utf-8'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#excel_to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.excel_to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for converting excel file to csv file</p>
+<dl class="simple">
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+<dt>csvfilepath:string</dt><dd><p>path of csv file to save</p>
+</dd>
+</dl>
+<p>encoding:   string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.excel_to_list">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">excel_to_list</code><span class="sig-paren">(</span><em class="sig-param">excelList</em>, <em class="sig-param">startAt=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#excel_to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.excel_to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for coverting list of xlrd.sheet.Cell to a nested list</p>
+<dl>
+<dt>excelList:  list of xlrd.sheet.Cell</dt><dd><p>usually output of read_xlsx function</p>
+</dd>
+<dt>startAt:    int</dt><dd><p>start index of rows</p>
+<p>if you have a header in the excel file, this would be 1</p>
+</dd>
+</dl>
+<dl>
+<dt>resultList: nested list</dt><dd><p>list of values of .csv file</p>
+<p>[[row1val1, row1val2, …],</p>
+<p>[row2val1, row2val2, …], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.nestedDict_to_xlsx">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">nestedDict_to_xlsx</code><span class="sig-paren">(</span><em class="sig-param">nestedDict</em>, <em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em>, <em class="sig-param">colNames=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#nestedDict_to_xlsx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.nestedDict_to_xlsx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for converting nested dictionary to excel file</p>
+<dl class="simple">
+<dt>nestedDict:     nested dictionary</dt><dd><p>dicationry to convert to an excel file</p>
+</dd>
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+<dt>colNames:   list of string</dt><dd><p>a list of column names. The number of column names should be same to that of data variables</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.pointGraph_to_xlsx">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">pointGraph_to_xlsx</code><span class="sig-paren">(</span><em class="sig-param">pointGraph</em>, <em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#pointGraph_to_xlsx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.pointGraph_to_xlsx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for converting a point graph to an excel file</p>
+<dl class="simple">
+<dt>pointGraph:     networkx graph  </dt><dd><p>point type networkx graph to convert</p>
+</dd>
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.read_csv">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">read_csv</code><span class="sig-paren">(</span><em class="sig-param">filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#read_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.read_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for reading a .csv file which separating values with comma(‘ ,’)</p>
+<dl class="simple">
+<dt>filepath:   string</dt><dd><p>path of the .csv file to handle</p>
+</dd>
+</dl>
+<dl>
+<dt>resultList: nested list</dt><dd><p>list of values of .csv file</p>
+<p>[[row1val1, row1val2, …],</p>
+<p>[row2val1, row2val2, …], …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.read_xlsx">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">read_xlsx</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#read_xlsx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.read_xlsx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for loading an excel file</p>
+<dl class="simple">
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+</dl>
+<p>resultXlrd: list of xlrd.sheet.Cell</p>
+<blockquote>
+<div><p>list of excel values in xlrd.sheet.Cell type</p>
+<p>value.ctype</p>
+<p>XL_CELL_EMPTY   0       empty string ‘’</p>
+<p>XL_CELL_TEXT    1       a Unicode string</p>
+<p>XL_CELL_NUMBER  2       float</p>
+<p>XL_CELL_DATE    3       float</p>
+<p>XL_CELL_BOOLEAN 4       int; 1 means TRUE, 0 means FALSE</p>
+<p>XL_CELL_ERROR   5       int representing internal Excel codes; 
+for a text representation, refer to the supplied dictionary error_text_from_code</p>
+<p>XL_CELL_BLANK   6       empty string ‘’. Note: this type will appear only when open_workbook(…, formatting_info=True) is used.</p>
+<p>value.value</p>
+<p>Or output of this function can be an input of ‘excel_to_list’ function</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.write_column">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">write_column</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em>, <em class="sig-param">insert</em>, <em class="sig-param">startCol=0</em>, <em class="sig-param">startRow=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#write_column"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.write_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for adding a set of columns in an existing excel file</p>
+<dl>
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+<dt>insert:     nested list</dt><dd><p>[ [col1], [col2] , [col3], …]</p>
+</dd>
+<dt>startCol:   int</dt><dd><p>index of staring column</p>
+<p>if 0, the next colume of the last column of the excel file</p>
+</dd>
+<dt>startRow:   int</dt><dd><p>index of staring row</p>
+<p>if 0, the next row of the last column of the excel file</p>
+<p>1, the first row</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.Excel.write_row">
+<code class="sig-prename descclassname">BPSpatial.FileIO.Excel.</code><code class="sig-name descname">write_row</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">sheetname</em>, <em class="sig-param">insert</em>, <em class="sig-param">startCol=1</em>, <em class="sig-param">startRow=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Excel.html#write_row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Excel.write_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for adding a set of rows in an existing excel file</p>
+<dl>
+<dt>filepath:   string</dt><dd><p>path of the excel file to handle</p>
+</dd>
+<dt>sheetname:  string</dt><dd><p>name of sheet to access</p>
+</dd>
+<dt>insert:     nested list</dt><dd><p>[[row1], [row2], [row3], …]</p>
+</dd>
+<dt>startCol:   int</dt><dd><p>index of staring column</p>
+<p>if 0, the next colume of the last column of the excel file</p>
+<p>1, A column of excel file</p>
+</dd>
+<dt>startRow:   int</dt><dd><p>index of staring row</p>
+<p>if 0, the next row of the last column of the excel file</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-BPSpatial.FileIO.Graph">
+<span id="graph"></span><h2>Graph<a class="headerlink" href="#module-BPSpatial.FileIO.Graph" title="Permalink to this headline">¶</a></h2>
+<p>&#64;author: bspark</p>
+<dl class="class">
+<dt id="BPSpatial.FileIO.Graph.Point">
+<em class="property">class </em><code class="sig-prename descclassname">BPSpatial.FileIO.Graph.</code><code class="sig-name descname">Point</code><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Point" title="Permalink to this definition">¶</a></dt>
+<dd><p>class to handle point-type graph that only has nodes without edges</p>
+<dl class="method">
+<dt id="BPSpatial.FileIO.Graph.Point.fromCsv">
+<em class="property">static </em><code class="sig-name descname">fromCsv</code><span class="sig-paren">(</span><em class="sig-param">csvPath</em>, <em class="sig-param">geometryKey</em>, <em class="sig-param">header=0</em>, <em class="sig-param">columns=[]</em>, <em class="sig-param">decimals=6</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Point.fromCsv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Point.fromCsv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for creating a networkx graph from excel file</p>
+<dl class="simple">
+<dt>csvPath:        string</dt><dd><p>path of csv file to access</p>
+</dd>
+<dt>geometryKey:    tuple</dt><dd><p>key of geometry(x,y) or (lng, lat) in columns or header list</p>
+</dd>
+<dt>header:         0 or None</dt><dd><p>0, if data contains column names, 
+None, otherwise</p>
+</dd>
+<dt>columns:        list of tuple</dt><dd><p>column name and type [(col1,dtype), (col2, dtype), …]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>graph:          networkx graph</dt><dd><p>a point-type graph, only having nodes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.Graph.Point.fromExcel">
+<em class="property">static </em><code class="sig-name descname">fromExcel</code><span class="sig-paren">(</span><em class="sig-param">excelPath</em>, <em class="sig-param">sheetName</em>, <em class="sig-param">geometryKey</em>, <em class="sig-param">header</em>, <em class="sig-param">columns</em>, <em class="sig-param">decimals=6</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Point.fromExcel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Point.fromExcel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for creating a networkx graph from excel file</p>
+<dl class="simple">
+<dt>excelPath:      string</dt><dd><p>path of excel file to access</p>
+</dd>
+<dt>sheetName:      string</dt><dd><p>name of sheet name to access</p>
+</dd>
+<dt>geometryKey:    tuple</dt><dd><p>key of geometry(x,y) or (lng, lat) in columns or header list</p>
+</dd>
+<dt>header:         0 or None</dt><dd><p>0, if data contains column names, 
+None, otherwise</p>
+</dd>
+<dt>columns:        list of tuple</dt><dd><p>column name and type [(col1,dtype), (col2, dtype), …]</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>graph:          networkx graph</dt><dd><p>a point-type graph, only having nodes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.Graph.Point.fromShapefile">
+<em class="property">static </em><code class="sig-name descname">fromShapefile</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">attrs=[]</em>, <em class="sig-param">decimals=-1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Point.fromShapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Point.fromShapefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for importing a shapefile and converting it to a newtorkx graph
+using geopandas to avoid of removal of points with the same coordinates</p>
+<dl class="simple">
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>attrs:          list of string</dt><dd><p>attributes to add to a graph from the input shp file</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>graph:          networkx Graph</dt><dd><p>a graph only with nodes, not edges
+graph.nodes - key:(x, y, ind), value:{column:value}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.Graph.Point.fromShapefile_nx">
+<em class="property">static </em><code class="sig-name descname">fromShapefile_nx</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">attrs=[]</em>, <em class="sig-param">decimals=-1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Point.fromShapefile_nx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Point.fromShapefile_nx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for importing a shapefile and converting it to a newtorkx graph
+using networkx. This may have a problem when the data has duplicate points</p>
+<dl class="simple">
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>attrs:          list of string</dt><dd><p>attributes to add to a graph from the input shp file</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>graph:          networkx Graph</dt><dd><p>a graph only with nodes, not edges
+graph.nodes - key:(x, y, ind), value:{column:value}</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="BPSpatial.FileIO.Graph.Polyline">
+<em class="property">class </em><code class="sig-prename descclassname">BPSpatial.FileIO.Graph.</code><code class="sig-name descname">Polyline</code><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Polyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to handle polyline-type graph that has both nodes and edges.
+But nodes has no attributes.</p>
+<dl class="method">
+<dt id="BPSpatial.FileIO.Graph.Polyline.fromShapefile">
+<em class="property">static </em><code class="sig-name descname">fromShapefile</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">attrs=[]</em>, <em class="sig-param">decimals=6</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/Graph.html#Polyline.fromShapefile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.Graph.Polyline.fromShapefile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for importing a shapefile and converting it to a newtorkx graph
+using networkx. This may have a problem when the data has duplicate points</p>
+<dl class="simple">
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>attrs:          list of string</dt><dd><p>attributes to add to a graph from the input shp file</p>
+</dd>
+<dt>decimals:       int</dt><dd><p>number of decimals to round</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>graph:          networkx Graph</dt><dd><p>a graph only with nodes, not edges
+graph.nodes - key:((x1, y2), (x2,y2)) value:{column:value}</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-BPSpatial.FileIO.RTree">
+<span id="rtree"></span><h2>RTree<a class="headerlink" href="#module-BPSpatial.FileIO.RTree" title="Permalink to this headline">¶</a></h2>
+<p>&#64;author: bspark</p>
+<dl class="function">
+<dt id="BPSpatial.FileIO.RTree.lineRect">
+<code class="sig-prename descclassname">BPSpatial.FileIO.RTree.</code><code class="sig-name descname">lineRect</code><span class="sig-paren">(</span><em class="sig-param">lineGraph</em>, <em class="sig-param">node1</em>, <em class="sig-param">node2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/RTree.html#lineRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.RTree.lineRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for generating rectangle for a edge using coordinates of vertises</p>
+<dl class="simple">
+<dt>lineGraph:  networkx graph</dt><dd><p>graph containing lines</p>
+</dd>
+<dt>node1:      tuple(x, y)</dt><dd><p>starting point of an edge</p>
+</dd>
+<dt>node2:      tuple(x, y)</dt><dd><p>ending point of an edge</p>
+</dd>
+</dl>
+<blockquote>
+<div><p>tuple(float, float, float, float)
+bounding box of an edge</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.RTree.pointRect">
+<code class="sig-prename descclassname">BPSpatial.FileIO.RTree.</code><code class="sig-name descname">pointRect</code><span class="sig-paren">(</span><em class="sig-param">coord</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/RTree.html#pointRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.RTree.pointRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for generating rectangle for a point</p>
+<dl class="simple">
+<dt>coord:  tuple or list of two values</dt><dd><p>x and y coordinates of a point</p>
+</dd>
+</dl>
+<blockquote>
+<div><p>boundary box of a point</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.RTree.rtree_point">
+<code class="sig-prename descclassname">BPSpatial.FileIO.RTree.</code><code class="sig-name descname">rtree_point</code><span class="sig-paren">(</span><em class="sig-param">graph</em>, <em class="sig-param">indField='Ind'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/RTree.html#rtree_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.RTree.rtree_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for creating a rtree index and inserting records using networkx graph</p>
+<dl class="simple">
+<dt>graph:      networkx graph</dt><dd><p>graph containing points</p>
+</dd>
+<dt>indField:   string</dt><dd><p>graph attribute for ind of the index</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>idxPoint            rtree.Index</dt><dd><p>Index of points</p>
+</dd>
+<dt>pointIdCoordDict    dictionary</dt><dd><p>Index values (key:index, value:tuple(x, y))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="BPSpatial.FileIO.RTree.rtree_polyline">
+<code class="sig-prename descclassname">BPSpatial.FileIO.RTree.</code><code class="sig-name descname">rtree_polyline</code><span class="sig-paren">(</span><em class="sig-param">polylineGraph</em>, <em class="sig-param">indField='Ind'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/RTree.html#rtree_polyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.RTree.rtree_polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for creating a rtree Index object and inserting records into it</p>
+<dl class="simple">
+<dt>polylinGraph:   networkx graph</dt><dd><p>graph containing edges</p>
+</dd>
+<dt>indField:       string</dt><dd><p>graph attribute for ind of the index</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>idxLine             rtree.Index</dt><dd><p>Index of lines</p>
+</dd>
+<dt>edgeIdCoordDict     dictionary</dt><dd><p>Index values (key:index, value:tuple(tuple(x, y), tuple(x,y)))</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-BPSpatial.FileIO.SHP">
+<span id="shapefile"></span><h2>Shapefile<a class="headerlink" href="#module-BPSpatial.FileIO.SHP" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="BPSpatial.FileIO.SHP.Point">
+<em class="property">class </em><code class="sig-prename descclassname">BPSpatial.FileIO.SHP.</code><code class="sig-name descname">Point</code><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for creating a shapefile of point data</p>
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Point.fromGraph">
+<em class="property">static </em><code class="sig-name descname">fromGraph</code><span class="sig-paren">(</span><em class="sig-param">pntGraph</em>, <em class="sig-param">shpPath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Point.fromGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Point.fromGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that creates a point shapefile from a networkx graph</p>
+<p>type of shapefile - <a class="reference external" href="https://en.wikipedia.org/wiki/Shapefile">https://en.wikipedia.org/wiki/Shapefile</a></p>
+<p>Example - <a class="reference external" href="https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/">https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/</a></p>
+<dl class="simple">
+<dt>pntGraph:       neworkx.Graph</dt><dd><p>a graph only has nodes object, not edges</p>
+</dd>
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Point.new">
+<em class="property">static </em><code class="sig-name descname">new</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">fields</em>, <em class="sig-param">records</em>, <em class="sig-param">geometryKey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Point.new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Point.new" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that creates a point shapefile</p>
+<p>type of shapefile - <a class="reference external" href="https://en.wikipedia.org/wiki/Shapefile">https://en.wikipedia.org/wiki/Shapefile</a></p>
+<p>Example - <a class="reference external" href="https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/">https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/</a></p>
+<dl class="simple">
+<dt>shpPath:    string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>fields:     list of tuple</dt><dd><p>list of data fields
+ex) [tuple(field name, type)]</p>
+</dd>
+<dt>records:    list of tuple</dt><dd><p>dataset
+ex) [(val11, val12, …),(val21, val22, …)]</p>
+</dd>
+<dt>geometryKey:tuple</dt><dd><p>geometry keys, location of latitude and longitude in the records
+ex) tuple(longitude, latitude) or tuple(x, y)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="BPSpatial.FileIO.SHP.Polyline">
+<em class="property">class </em><code class="sig-prename descclassname">BPSpatial.FileIO.SHP.</code><code class="sig-name descname">Polyline</code><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Polyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for creating a shapefile of polyline data</p>
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Polyline.fromGraph">
+<em class="property">static </em><code class="sig-name descname">fromGraph</code><span class="sig-paren">(</span><em class="sig-param">polylineGraph</em>, <em class="sig-param">shpPath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Polyline.fromGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Polyline.fromGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that creates a polyline shapefile</p>
+<p>type of shapefile - <a class="reference external" href="https://en.wikipedia.org/wiki/Shapefile">https://en.wikipedia.org/wiki/Shapefile</a></p>
+<dl class="simple">
+<dt>polylineGraph:  neworkx.Graph</dt><dd><p>polyline type graph that includes edges information</p>
+</dd>
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Polyline.new">
+<em class="property">static </em><code class="sig-name descname">new</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">polylineGraph</em>, <em class="sig-param">fields</em>, <em class="sig-param">records</em>, <em class="sig-param">geometryKey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Polyline.new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Polyline.new" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that creates a polyline shapefile</p>
+<p>type of shapefile - <a class="reference external" href="https://en.wikipedia.org/wiki/Shapefile">https://en.wikipedia.org/wiki/Shapefile</a></p>
+<p>Example - <a class="reference external" href="https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/">https://glenbambrick.com/2016/01/09/csv-to-shapefile-with-pyshp/</a></p>
+<dl class="simple">
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>polylineGraph:  networkx graph</dt><dd><p>polyline type graph which including coordinates of vertices</p>
+</dd>
+<dt>fields:         list of tuple</dt><dd><p>list of data fields
+ex) [tuple(field name, type)]</p>
+</dd>
+<dt>records:        list of tuple</dt><dd><p>dataset
+ex) [(val11, val12, …),(val21, val22, …)]</p>
+</dd>
+<dt>geometryKey:    tuple</dt><dd><p>geometry keys, location of two end nodes in the records
+ex) tuple(tuple(longitude, latitude), tuple(longitude, latitude))</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="BPSpatial.FileIO.SHP.Projection">
+<em class="property">class </em><code class="sig-prename descclassname">BPSpatial.FileIO.SHP.</code><code class="sig-name descname">Projection</code><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles with projection related functions</p>
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Projection.copyCRS">
+<code class="sig-name descname">copyCRS</code><span class="sig-paren">(</span><em class="sig-param">shpPathTo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Projection.copyCRS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Projection.copyCRS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for copying the crs of existing .prj file to another shp file</p>
+<dl class="simple">
+<dt>shpPathFrom: string</dt><dd><p>shp file path that you copies the crs from</p>
+</dd>
+<dt>shpPathTo:   string</dt><dd><p>shp file path to add the copied crs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Projection.defineProjection">
+<code class="sig-name descname">defineProjection</code><span class="sig-paren">(</span><em class="sig-param">crsCode</em>, <em class="sig-param">crsType</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Projection.defineProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Projection.defineProjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that creates a .proj file for shapefile</p>
+<dl class="simple">
+<dt>shpPath:    string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>crsCode:    int</dt><dd><p>coordinate reference system code</p>
+</dd>
+<dt>crsType:    string</dt><dd><p>‘epsg’ or ‘sr-org’. The others can raise an error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Projection.getPROJ4">
+<code class="sig-name descname">getPROJ4</code><span class="sig-paren">(</span><em class="sig-param">crsType</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Projection.getPROJ4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Projection.getPROJ4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get ‘Proj4’ type projection information from spatialreference.org</p>
+<p>This is utilized when implementing project()</p>
+<p>The output is a dictionray which is standard crs form</p>
+<dl class="simple">
+<dt>crsCode:    int</dt><dd><p>coordinate reference system code</p>
+</dd>
+<dt>crsType:    string</dt><dd><p>‘epsg’, ‘esri’, or ‘sr-org’. The others can raise an error.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>crsDict:    dictionary</dt><dd><p>coordinate reference system in dictionary type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Projection.getWKT_PRJ">
+<code class="sig-name descname">getWKT_PRJ</code><span class="sig-paren">(</span><em class="sig-param">crsType</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Projection.getWKT_PRJ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Projection.getWKT_PRJ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get ‘Human-Readable OGC WKT’ type projection information from spatialreference.org</p>
+<p>This is utilized when creating .prj file</p>
+<p>Ex) <a class="reference external" href="https://glenbambrick.com/2015/08/09/prj/">https://glenbambrick.com/2015/08/09/prj/</a></p>
+<dl class="simple">
+<dt>crsCode:    int</dt><dd><p>coordinate reference system code</p>
+</dd>
+<dt>crsType:    string</dt><dd><p>‘epsg’, ‘esri’, or ‘sr-org’. The others can raise an error.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>crsStr:     string</dt><dd><p>coordinate reference system in string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.Projection.project">
+<code class="sig-name descname">project</code><span class="sig-paren">(</span><em class="sig-param">crs</em>, <em class="sig-param">shpPathPrj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#Projection.project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.Projection.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to convert projection of a shapefile</p>
+<dl class="simple">
+<dt>shpfile:    string</dt><dd><p>path of input shapefile to convert the coordinate system</p>
+</dd>
+<dt>crs:        dictionary</dt><dd><p>a standard form of crs</p>
+</dd>
+<dt>path:       string</dt><dd><p>path of the output shapefile</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="BPSpatial.FileIO.SHP.dbf">
+<em class="property">class </em><code class="sig-prename descclassname">BPSpatial.FileIO.SHP.</code><code class="sig-name descname">dbf</code><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#dbf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.dbf" title="Permalink to this definition">¶</a></dt>
+<dd><p>class for handling dbf file, which attributes of spatial dataset</p>
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.dbf.dropFields">
+<em class="property">static </em><code class="sig-name descname">dropFields</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">dropfieldList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#dbf.dropFields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.dbf.dropFields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that delete fields of geopandas Dataframe</p>
+<dl class="simple">
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>dropfieldList:  list</dt><dd><p>column names to delete</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="BPSpatial.FileIO.SHP.dbf.renameField">
+<em class="property">static </em><code class="sig-name descname">renameField</code><span class="sig-paren">(</span><em class="sig-param">shpPath</em>, <em class="sig-param">fromName</em>, <em class="sig-param">toName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/BPSpatial/FileIO/SHP.html#dbf.renameField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#BPSpatial.FileIO.SHP.dbf.renameField" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that change name of column</p>
+<dl class="simple">
+<dt>shpPath:        string</dt><dd><p>path of shapefile to handle</p>
+</dd>
+<dt>fromName:       string</dt><dd><p>column name to change</p>
+</dd>
+<dt>toName:         string</dt><dd><p>new name of the column</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="BPS_Analysis.html" class="btn btn-neutral float-left" title="Spatial Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Bumsub Park
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
